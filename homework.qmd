@@ -301,7 +301,6 @@ any(duplicated(gf_wide$ID))
 stopifnot(!any(duplicated(gf_wide$ID)))
 ```
 
-
 ## 2. Объединение данных
 
 ```{r}
@@ -327,6 +326,50 @@ n_missing
 ```
 
 В таблице all_data 170 строк (по одной на каждого участника). Столбцы ID, AGE, SEX, ARM, SCREENING 1_Height, SCREENING 1_Weight, rs429358, rs7412 и apoe_genotype заполнены полностью. Пропуски есть в лабораторных показателях (HGB — 4, VITB12 — 3) и в весе на визите WEEK 4 (16 пропусков) — это пациенты, у которых нет измерения на соответствующем визите.
+
+## Заполнение пропущенных значений (imputation)
+
+Пропущенные значения количественных показателей заполнены средним значением
+внутри группы по полу (`SEX`) и возрастной группе (50–59, 60–69, 70–79, 80–89).
+
+```{r}
+all_data <- mutate(
+  all_data,
+  age_grp = cut(
+    AGE,
+    breaks = c(49, 59, 69, 79, 89),
+    labels = c("50-59", "60-69", "70-79", "80-89")
+  )
+)
+```
+
+```{r}
+all_data <- mutate(
+  all_data,
+  `WEEK 4_Weight` = as.numeric(`WEEK 4_Weight`)
+)
+class(all_data$`WEEK 4_Weight`)
+```
+
+```{r}
+all_data_gr <- group_by(all_data, SEX, age_grp)
+all_data_gr <- mutate(
+  all_data_gr,
+  HGB = ifelse(is.na(HGB), mean(HGB, na.rm = TRUE), HGB),
+  VITB12 = ifelse(is.na(VITB12), mean(VITB12, na.rm = TRUE), VITB12),
+  `WEEK 4_Weight` = ifelse(
+    is.na(`WEEK 4_Weight`),
+    mean(`WEEK 4_Weight`, na.rm = TRUE),
+    `WEEK 4_Weight`
+  )
+)
+all_data <- ungroup(all_data_gr)
+```
+
+```{r}
+colSums(is.na(all_data))
+```
+
 
 ## 3. Описательные статистики и отчёт
 
@@ -532,10 +575,3 @@ table_e4
 # См. документацию:
 # ?tbl_summary
 ```
-
-### 4.3. Заполнение пропущенных значений
-
-Создайте и загрузите на GitHub экспериментальную ветку `imputation`.
-В этой ветке перед разделом 3 заполните пропущенные значения количественных показателей, используемых в анализе, средним значением показателя в группе по полу и возрасту.
-Используйте возрастные группы 50-59, 60-69, 70-79 и 80-89 лет.
-В дальнейшем анализе используйте датафрейм после заполнения пропусков.
