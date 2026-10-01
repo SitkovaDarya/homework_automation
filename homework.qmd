@@ -658,14 +658,15 @@ all_data |>
       VITB12 = "VITB12, пмоль/л"
     )
   ) |>
+
   ggplot(aes(x = ARM, y = value, fill = ARM)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(width = 0.15, size = 1) +
   facet_wrap(~Показатель, scales = "free_y") +
   labs(
     x = "Группа лечения",
-    y = NULL,
-    title = "Лабораторные показатели по группам лечения"
+    y = "Значение",
+    title = "Показатели по группам лечения"
   ) +
   theme_minimal() +
   theme(
@@ -686,14 +687,15 @@ all_data |>
       VITB12 = "VITB12, пмоль/л"
     )
   ) |>
+
   ggplot(aes(x = e4, y = value, fill = e4)) +
   geom_violin(alpha = 0.6) +
   geom_jitter(width = 0.1, size = 1) +
   facet_wrap(~Показатель, scales = "free_y") +
   labs(
     x = "Носитель ε4",
-    y = NULL,
-    title = "Лабораторные показатели по носительству ε4"
+    y = "Значение",
+    title = "Показатели по носительству ε4"
   ) +
   theme_minimal() +
   theme(
@@ -745,7 +747,8 @@ vika_all_data |>
     fill = "Категория BMI",
     title = "Категория BMI по группам лечения"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
 ```{r}
@@ -772,8 +775,7 @@ all_data |>
   mutate(percent = n / sum(n) * 100) |>
   ggplot(aes(x = apoe_genotype, y = percent, fill = ARM)) +
   geom_col(position = "dodge") +
-  labs(
-    x = "Генотип APOE",
+  labs(x = "Генотип APOE",
     y = "Доля участников, %",
     fill = "Группа лечения",
     title = "Распределение генотипов APOE по группам лечения"
@@ -788,30 +790,24 @@ all_data |>
   pivot_longer(
     c(BMI, HGB, VITB12),
     names_to = "Показатель",
-    values_to = "value"
-  ) |>
+    values_to = "value" ) |>
   mutate(
     Показатель = recode(
       Показатель,
       BMI = "BMI, кг/м²",
       HGB = "HGB, ммоль/л",
-      VITB12 = "VITB12, пмоль/л"
-    )
-  ) |>
+      VITB12 = "VITB12, пмоль/л")) |>
+
   ggplot(aes(x = apoe_genotype, y = value, fill = apoe_genotype)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(width = 0.15, size = 0.8) +
   facet_wrap(~Показатель, scales = "free_y") +
-  labs(
-    x = "Генотип APOE",
-    y = NULL,
-    title = "BMI и лабораторные показатели по генотипу APOE"
-  ) +
+  labs( x = "Генотип APOE",
+    y = "Значение"
+    title = "BMI и лабораторные показатели по генотипу APOE") +
   theme_minimal() +
-  theme(
-    legend.position = "none",
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  )
+  theme( legend.position = "none",
+    axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ### 4.3. Заполнение пропущенных значений
